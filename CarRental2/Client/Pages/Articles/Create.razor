@@ -1,0 +1,28 @@
+﻿@page "/article/create"
+@inject HttpClient _client
+@inject NavigationManager _navManager
+
+<h3 class="card-title">Create new expense</h3>
+<hr />
+<br />
+<FormComponent ButtonText="Create article" article="article" OnValidSubmit="@Createarticle" />
+
+
+
+@code {
+    Article article = new Article();
+
+
+
+
+    protected async override Task OnInitializedAsync()
+    {
+        
+    }
+
+    private async Task Createarticle()
+    {
+        await _client.PostAsJsonAsync(Endpoints.ArticlesEndpoint, article);
+        _navManager.NavigateTo("/article/");
+    }
+}

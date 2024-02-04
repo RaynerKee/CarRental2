@@ -1,0 +1,84 @@
+﻿@page "/expense/"
+@inject HttpClient _client
+@inject IJSRuntime js
+@attribute [Authorize]
+<h3 class="card-title">Expenses</h3>
+
+<a href="/expense/create" class="btn btn-secondary">
+    <span class="oi oi-plus"></span>
+    Create new expense
+</a>
+<br />
+<br />
+
+
+@if (expenses == null)
+{
+    <div class="alert alert-info">Loading expenses....</div>
+}
+else
+{
+    <div class="total-amount">
+        Total Amount: @totalAmount
+    </div>
+
+    <table class="table table-responsive">
+        <thead>
+            <tr>
+
+                <th>Amount</th>
+                <th>Month</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var expense in expenses)
+            {
+                <tr>
+                    <td>@expense.Amount</td>
+                    <td>@expense.Month</td>
+
+
+                </tr>
+
+            }
+
+
+        </tbody>
+
+
+
+    </table>
+}
+<br />
+@code {
+    private List<Expense>? expenses;
+    private decimal totalAmount;
+
+    protected async override Task OnInitializedAsync()
+    {
+        expenses = await _client.GetFromJsonAsync<List<Expense>>($"{Endpoints.ExpensesEndpoint}");
+        CalculateTotalAmount();
+    }
+
+    private void CalculateTotalAmount()
+    {
+        if (expenses != null)
+        {
+            totalAmount = expenses.Sum(s => s.Amount);
+        }
+    }
+
+    async Task Delete(int expenseId)
+    {
+        if (expenses != null)
+        {
+            var expense = expenses.First(q => q.Id == expenseId);
+            var confirm = await js.InvokeAsync<bool>("confirm", $"Do you want to delete {expense.Amount}?");
+            if (confirm)
+            {
+                await _client.DeleteAsync($"{Endpoints.ExpensesEndpoint}/{expenseId}");
+                await OnInitializedAsync();
+            }
+        }
+    }
+}

@@ -1,0 +1,28 @@
+﻿@page "/expense/create"
+@inject HttpClient _client
+@inject NavigationManager _navManager
+
+<h3 class="card-title">Create new expense</h3>
+<hr />
+<br />
+<FormComponent ButtonText="Create Expense" expense="expense" OnValidSubmit="@CreateExpense" />
+
+
+
+@code {
+    Expense expense = new Expense();
+
+
+
+
+    protected async override Task OnInitializedAsync()
+    {
+
+    }
+
+    private async Task CreateExpense()
+    {
+        await _client.PostAsJsonAsync(Endpoints.ExpensesEndpoint, expense);
+        _navManager.NavigateTo("/expense/");
+    }
+}
